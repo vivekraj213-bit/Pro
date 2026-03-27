@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Harvester PRO MAX</title>
+<style>
+body {font-family:Arial; margin:0; background:#eef2f7;}
+header {background:#1e272e; color:white; padding:15px; text-align:center;}
+.container {padding:20px;}
+input, select {padding:8px; margin:5px;}
+button {padding:8px 12px; margin:5px; cursor:pointer;}
+.add {background:green; color:white;}
+.delete {background:red; color:white;}
+.edit {background:orange; color:white;}
+.login {background:#0984e3; color:white;}
+table {width:100%; border-collapse:collapse; margin-top:20px;}
+th, td {border:1px solid #ccc; padding:10px; text-align:center;}
+th {background:#2f3640; color:white;}
+.card {background:white; padding:15px; margin-top:15px; border-radius:10px;}
+</style>
+</head>
+<body><header>
+<h2>🚜 Harvester PRO MAX System</h2>
+</header><div class="container" id="loginPage">
+<h3>🔐 Login</h3>
+<input type="text" id="user" placeholder="Username">
+<input type="password" id="pass" placeholder="Password">
+<button class="login" onclick="login()">Login</button>
+</div><div class="container" id="main" style="display:none;"><div class="card">
+<h3>➕ नया काम जोड़ें</h3>
+<input type="text" id="farmer" placeholder="किसान">
+<input type="text" id="village" placeholder="गांव">
+<select id="crop">
+<option>गेहूं</option>
+<option>धान</option>
+<option>लाही</option>
+<option>सरसों</option>
+</select>
+<input type="number" id="acre" placeholder="एकड़">
+<input type="number" id="rate" placeholder="रेट">
+<input type="number" id="paid" placeholder="मिला पैसा">
+<button class="add" onclick="addRecord()">Add</button>
+</div><div class="card">
+<h3>⛽ खर्चा (Diesel / मजदूरी)</h3>
+<input type="number" id="expense" placeholder="खर्चा">
+<button onclick="addExpense()">Add Expense</button>
+<h4 id="totalExpense">कुल खर्चा: ₹0</h4>
+</div><div class="card">
+<h3>🔍 सर्च</h3>
+<input type="text" id="search" onkeyup="searchData()" placeholder="नाम खोजें">
+</div><table>
+<thead>
+<tr>
+<th>नाम</th><th>गांव</th><th>फसल</th><th>एकड़</th><th>रेट</th><th>कुल</th><th>मिला</th><th>बाकी</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="data"></tbody>
+</table><div class="card">
+<h3 id="income">कुल कमाई: ₹0</h3>
+<h3 id="expenseShow">कुल खर्चा: ₹0</h3>
+<h2 id="profit">शुद्ध मुनाफा: ₹0</h2>
+</div></div><script>
+let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+
+function login(){
+let u = document.getElementById("user").value;
+let p = document.getElementById("pass").value;
+if(u=="admin" && p=="1234"){
+document.getElementById("loginPage").style.display="none";
+document.getElementById("main").style.display="block";
+show();
+}else{alert("गलत लॉगिन");}
+}
+
+function save(){
+localStorage.setItem("harvesterPro", JSON.stringify(records));
+localStorage.setItem("expenses", JSON.stringify(expenses));
+}
+
+function addRecord(){
+let farmer = farmerInput.value;
+let village = villageInput.value;
+let crop = cropInput.value;
+let acre = parseFloat(acreInput.value);
+let rate = parseFloat(rateInput.value);
+let paid = parseFloat(paidInput.value);
+
+let total = acre * rate;
+let due = total - paid;
+
+records.push({farmer,village,crop,acre,rate,total,paid,due});
+save();
+show();
+}
+
+function addExpense(){
+let exp = parseFloat(document.getElementById("expense").value);
+expenses.push(exp);
+save();
+show();
+}
+
+function show(){
+let data = document.getElementById("data");
+data.innerHTML="";
+let income=0, expTotal=0;
+
+records.forEach((r,i)=>{
+income += r.total;
+data.innerHTML += `<tr>
+<td>${r.farmer}</td>
+<td>${r.village}</td>
+<td>${r.crop}</td>
+<td>${r.acre}</td>
+<td>${r.rate}</td>
+<td>${r.total}</td>
+<td>${r.paid}</td>
+<td>${r.due}</td>
+<td>
+<button class="edit" onclick="editRecord(${i})">Edit</button>
+<button class="delete" onclick="deleteRecord(${i})">Delete</button>
+</td>
+</tr>`;
+});
+
+expenses.forEach(e=> expTotal+=e);
+
+let profit = income - expTotal;
+
+document.getElementById("income").innerText = "कुल कमाई: ₹"+income;
+document.getElementById("expenseShow").innerText = "कुल खर्चा: ₹"+expTotal;
+document.getElementById("profit").innerText = "शुद्ध मुनाफा: ₹"+profit;
+}
+
+function deleteRecord(i){
+records.splice(i,1);
+save(); show();
+}
+
+function editRecord(i){
+let r = records[i];
+farmerInput.value=r.farmer;
+villageInput.value=r.village;
+cropInput.value=r.crop;
+acreInput.value=r.acre;
+rateInput.value=r.rate;
+paidInput.value=r.paid;
+deleteRecord(i);
+}
+
+function searchData(){
+let val = search.value.toLowerCase();
+document.querySelectorAll("tbody tr").forEach(row=>{
+row.style.display = row.innerText.toLowerCase().includes(val)?"":"none";
+});
+}
+
+const farmerInput = document.getElementById("farmer");
+const villageInput = document.getElementById("village");
+const cropInput = document.getElementById("crop");
+const acreInput = document.getElementById("acre");
+const rateInput = document.getElementById("rate");
+const paidInput = document.getElementById("paid");
+
+</script></body>
+</html>
