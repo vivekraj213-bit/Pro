@@ -8,430 +8,230 @@
 body {font-family:Arial; margin:0; background:#eef2f7;}
 header {background:#1e272e; color:white; padding:15px; text-align:center;}
 
-/* LOGIN */
 #loginPage {
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-background: linear-gradient(135deg, #667eea, #764ba2);
+display:flex;justify-content:center;align-items:center;
+height:100vh;background: linear-gradient(135deg, #667eea, #764ba2);
 }
-.loginBox {
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
-text-align:center;
-}
-.loginBox input {
-width:85%;
-margin:10px 0;
-padding:12px;
-border-radius:8px;
-border:1px solid #ccc;
-}
-.login {
-background: linear-gradient(45deg, #00b894, #00cec9);
-color:white;
-width:90%;
-}
+.loginBox {background:white;padding:30px;border-radius:12px;text-align:center;}
 
-/* MAIN */
 .container {padding:15px;}
-input, select {
-padding:10px; margin:5px;
-border-radius:5px; border:1px solid #ccc;
-}
-button {
-padding:10px 15px; margin:5px;
-border:none; border-radius:5px;
-cursor:pointer; font-weight:bold;
-}
-.add {background:green; color:white;}
-.delete {background:red; color:white;}
-.edit {background:orange; color:white;}
-.logout {background:black; color:white;}
-.clear {background:#6c5ce7; color:white;}
+input, select {padding:10px;margin:5px;border-radius:5px;border:1px solid #ccc;}
+button {padding:10px 15px;margin:5px;border:none;border-radius:5px;font-weight:bold;}
 
-table {width:100%; border-collapse:collapse; margin-top:20px;}
-th, td {border:1px solid #ccc; padding:10px; text-align:center;}
-th {background:#2f3640; color:white;}
+.add{background:green;color:white;}
+.delete{background:red;color:white;}
+.edit{background:orange;color:white;}
+.logout{background:black;color:white;}
 
-.card {
-background:white; padding:15px;
-margin-top:15px; border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
+table {width:100%;border-collapse:collapse;margin-top:20px;}
+th, td {border:1px solid #ccc;padding:10px;text-align:center;}
+th {background:#2f3640;color:white;}
 
-.dueHighlight {
-color:red;
-font-weight:bold;
-text-decoration:underline;
-}
+.card {background:white;padding:15px;margin-top:15px;border-radius:10px;}
+
+.dueHighlight {color:red;font-weight:bold;text-decoration:underline;}
+.dueDanger {animation:blink 1s infinite;}
+@keyframes blink {50%{opacity:0.3;}}
+
+.paidHighlight {color:green;font-weight:bold;}
+.paidFull {color:darkgreen;font-weight:bold;}
+.zeroValue {color:gray;}
 </style>
 </head>
 
 <body>
 
-<header>
-<h2>🚜 Sagar Harvester Company Limited </h2>
-</header>
+<header><h2>🚜 Sagar Harvester Company Limited</h2></header>
 
-<!-- LOGIN -->
 <div id="loginPage">
 <div class="loginBox">
 <h2>🔐 Login</h2>
-<input type="text" id="user" placeholder="Username">
-<input type="password" id="pass" placeholder="Password">
-<button class="login" onclick="login()">Login</button>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
 </div>
 </div>
 
-<!-- MAIN -->
 <div class="container" id="main" style="display:none;">
 
 <button class="logout" onclick="logout()">Logout</button>
 
-<!-- HARVESTER RECORD CARD -->
-<div class="card">
-<h3>➕ नया काम</h3>
+<!-- DASHBOARD -->
+<div class="card" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+<div class="card"><h3>💰 Income</h3><h2 id="dashIncome">₹0</h2></div>
+<div class="card"><h3>🟢 Paid</h3><h2 id="dashPaid">₹0</h2></div>
+<div class="card"><h3>🔴 Due</h3><h2 id="dashDue">₹0</h2></div>
+<div class="card"><h3>💸 Expense</h3><h2 id="dashExpense">₹0</h2></div>
+</div>
 
+<!-- ORIGINAL FORM SAME -->
+<div class="card">
 <input type="date" id="date">
 <input type="text" id="farmer" placeholder="किसान">
 <input type="text" id="village" placeholder="गांव">
 <input type="text" id="mobile" placeholder="मोबाइल">
-
 <select id="crop">
-<option>गेहूं</option>
-<option>धान</option>
-<option>लाही</option>
-<option>सरसों</option>
+<option>गेहूं</option><option>धान</option>
+<option>लाही</option><option>सरसों</option>
 </select>
-
 <input type="number" id="acre" placeholder="एकड़">
 <input type="number" id="rate" placeholder="रेट">
 <input type="number" id="paid" placeholder="मिला पैसा">
 <input type="number" id="expense" placeholder="खर्चा">
-
 <button class="add" onclick="addRecord()">Add</button>
 </div>
 
-<!-- SEARCH & FILTER -->
-<div class="card">
-<h3>🔍 Search + Date Filter</h3>
-
-<input type="text" id="search" onkeyup="searchData()" placeholder="नाम खोजें">
-
-<input type="date" id="fromDate">
-<input type="date" id="toDate">
-<button onclick="filterByDate()">Filter</button>
-
-</div>
-
-<div class="card">
-<button onclick="downloadExcel()">📥 Excel</button>
-</div>
-
-<div class="card">
-<h3>🔴 बाकी वाले (Priority)</h3>
-<ul id="dueList"></ul>
-</div>
-
 <table>
-<thead>
 <tr>
-<th>Date</th><th>नाम</th><th>गांव</th><th>मोबाइल</th>
-<th>फसल</th><th>एकड़</th><th>कुल</th>
-<th>मिला</th><th>बाकी</th><th>खर्चा</th><th>Action</th>
+<th>Date</th><th>नाम</th><th>कुल</th>
+<th>मिला</th><th>बाकी</th><th>Action</th>
 </tr>
-</thead>
 <tbody id="data"></tbody>
 </table>
 
+<!-- EXTRA EXPENSE -->
 <div class="card">
-<h3 id="income">कुल काम: ₹0</h3>
-<h3 id="paidShow">मिला पैसा: ₹0</h3>
-<h3 id="expenseShow">खर्चा: ₹0</h3>
-<h2 id="profit">मुनाफा: ₹0</h2>
-</div>
-
-<!-- EXTRA EXPENSE CARD -->
-<div class="card">
-<h3>💰 एक्स्ट्रा खर्चा</h3>
-<input type="text" id="extraItem" placeholder="Item / खर्चा विवरण">
-<input type="number" id="extraRate" placeholder="Rate / ₹">
-<input type="number" id="extraQty" placeholder="Quantity">
-<input type="date" id="extraDate">
-<button class="add" onclick="addExtra()">Add</button>
+<h3>💰 Extra Expense</h3>
+<input id="extraItem" placeholder="Item">
+<input id="extraRate" type="number" placeholder="Rate">
+<input id="extraQty" type="number" placeholder="Qty">
+<input id="extraDate" type="date">
+<button onclick="addExtra()">Add</button>
 
 <table>
-<thead>
-<tr>
-<th>S.No.</th>
-<th>Item</th>
-<th>Rate</th>
-<th>Quantity</th>
-<th>Total</th>
-<th>Date</th>
-<th>Action</th>
-</tr>
-</thead>
+<tr><th>S.No</th><th>Item</th><th>Total</th><th>Date</th><th></th></tr>
 <tbody id="extraData"></tbody>
 </table>
-<h4 id="extraDayTotal">कुल खर्चा: ₹0</h4>
+<h4 id="extraDayTotal"></h4>
 </div>
 
 <script>
-let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
-let editIndex = -1;
-let extraRecords = JSON.parse(localStorage.getItem("extraExpense")) || [];
 
-const addBtn = document.querySelector(".add");
+// LOGIN REMEMBER
+if(localStorage.getItem("login")=="yes"){
+loginPage.style.display="none";
+main.style.display="block";
+}
 
 function login(){
-  if(user.value=="V" && pass.value=="1"){
-    loginPage.style.display="none";
-    main.style.display="block";
-    show(records);
-    showExtra();
-  } else {
-    alert("कृपया विवेक जी से अनुमति लाइए");
-  }
+if(user.value=="V" && pass.value=="1"){
+localStorage.setItem("login","yes");
+loginPage.style.display="none";
+main.style.display="block";
+show();showExtra();
+}
 }
 
 function logout(){
-  main.style.display="none";
-  loginPage.style.display="flex";
+localStorage.removeItem("login");
+location.reload();
 }
+
+let records=JSON.parse(localStorage.getItem("harvesterPro"))||[];
+let extraRecords=JSON.parse(localStorage.getItem("extraExpense"))||[];
+const adminPassword="admin123";
 
 function save(){
-  localStorage.setItem("harvesterPro", JSON.stringify(records));
-}
-
-function clearFields(){
-  date.value="";
-  farmer.value="";
-  village.value="";
-  mobile.value="";
-  crop.value="गेहूं";
-  acre.value="";
-  rate.value="";
-  paid.value="";
-  expense.value="";
+localStorage.setItem("harvesterPro",JSON.stringify(records));
 }
 
 function addRecord(){
-  let total = acre.value * rate.value;
-  let due = total - paid.value;
+let total=acre.value*rate.value;
+let due=total-paid.value;
 
-  if(editIndex === -1){
-    records.push({
-      date:date.value,
-      farmer:farmer.value,
-      village:village.value,
-      mobile:mobile.value,
-      crop:crop.value,
-      acre:+acre.value,
-      rate:+rate.value,
-      total:total,
-      paid:+paid.value,
-      due:due,
-      expense:+expense.value || 0
-    });
-  } else {
-    records[editIndex] = {
-      date:date.value,
-      farmer:farmer.value,
-      village:village.value,
-      mobile:mobile.value,
-      crop:crop.value,
-      acre:+acre.value,
-      rate:+rate.value,
-      total:total,
-      paid:+paid.value,
-      due:due,
-      expense:+expense.value || 0
-    };
-    editIndex = -1;
-    addBtn.innerText = "Add";
-  }
+records.push({
+date:date.value,
+farmer:farmer.value,
+total:total,
+paid:+paid.value,
+due:due,
+expense:+expense.value||0
+});
 
-  save();
-  show(records);
-  clearFields();
+save();show();
 }
 
-function show(dataArr){
-  let html="";
-  let dueHTML="";
-  let totalIncome=0, totalPaid=0, totalExpense=0;
+function show(){
+let html="",ti=0,tp=0,te=0;
 
-  dataArr.forEach((r,i)=>{
-    totalIncome += r.total;
-    totalPaid += r.paid;
-    totalExpense += r.expense;
+records.forEach((r,i)=>{
+ti+=r.total;tp+=r.paid;te+=r.expense;
 
-    if(r.due > 0){
-      dueHTML += `<li>
-      ${r.farmer} - ₹${r.due}
-      <a href="tel:${r.mobile}">📞</a>
-      <a href="https://wa.me/91${r.mobile}?text=आपका ₹${r.due} बाकी है">📲</a>
-      </li>`;
-    }
+html+=`<tr>
+<td>${r.date}</td>
+<td>${r.farmer}</td>
+<td>₹${r.total}</td>
 
-    html += `<tr>
-    <td>${r.date}</td>
-    <td>${r.farmer}</td>
-    <td>${r.village}</td>
-    <td>${r.mobile}</td>
-    <td>${r.crop}</td>
-    <td>${r.acre}</td>
-    <td>${r.total}</td>
-    <td>${r.paid}</td>
-    <td class="${r.due>0?'dueHighlight':''}">${r.due}</td>
-    <td>${r.expense}</td>
-    <td>
-      <button class="edit" onclick="editRecord(${i})">Edit</button>
-      <button class="delete" onclick="deleteRecord(${i})">Delete</button>
-    </td>
-    </tr>`;
-  });
+<td class="${
+r.paid==0?'zeroValue':
+r.paid>=r.total?'paidFull':'paidHighlight'
+}">₹${r.paid}</td>
 
-  data.innerHTML = html;
-  dueList.innerHTML = dueHTML;
+<td class="${
+r.due==0?'zeroValue':
+r.due>5000?'dueHighlight dueDanger':'dueHighlight'
+}">₹${r.due}</td>
 
-  let profitVal = totalPaid - totalExpense;
+<td><button onclick="del(${i})">Delete</button></td>
+</tr>`;
+});
 
-  income.innerText = "कुल काम: ₹"+totalIncome;
-  paidShow.innerText = "मिला पैसा: ₹"+totalPaid;
-  expenseShow.innerText = "खर्चा: ₹"+totalExpense;
-  profit.innerText = "मुनाफा: ₹"+profitVal;
+data.innerHTML=html;
+
+dashIncome.innerText="₹"+ti;
+dashPaid.innerText="₹"+tp;
+dashDue.innerText="₹"+(ti-tp);
+dashExpense.innerText="₹"+te;
 }
 
-function deleteRecord(i){
-  if(confirm("क्या आप सच में यह रिकॉर्ड डिलीट करना चाहते हैं?")){
-    records.splice(i,1);
-    save();
-    show(records);
-    clearFields();
-    editIndex = -1;
-    addBtn.innerText = "Add";
-  }
+function del(i){
+let p=prompt("Admin Password:");
+if(p!=adminPassword)return alert("Wrong Password");
+records.splice(i,1);
+save();show();
 }
 
-function editRecord(i){
-  let r = records[i];
-
-  date.value=r.date;
-  farmer.value=r.farmer;
-  village.value=r.village;
-  mobile.value=r.mobile;
-  crop.value=r.crop;
-  acre.value=r.acre;
-  rate.value=r.rate;
-  paid.value=r.paid;
-  expense.value=r.expense;
-
-  editIndex = i;
-  addBtn.innerText = "Update";
-}
-
-function searchData(){
-  let val = search.value.toLowerCase();
-  let filtered = records.filter(r =>
-    r.farmer.toLowerCase().includes(val)
-  );
-  show(filtered);
-}
-
-function filterByDate(){
-  let f = fromDate.value;
-  let t = toDate.value;
-  let filtered = records.filter(r =>
-    r.date >= f && r.date <= t
-  );
-  show(filtered);
-}
-
-function downloadExcel(){
-  let csv = 'Date,Name,Village,Mobile,Crop,Acre,Rate,Total,Paid,Due,Expense\n';
-
-  records.forEach(r=>{
-    csv += `${r.date},${r.farmer},${r.village},${r.mobile},${r.crop},${r.acre},${r.rate},${r.total},${r.paid},${r.due},${r.expense}\n`;
-  });
-
-  let blob = new Blob([csv]);
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "harvester.csv";
-  a.click();
-}
-
-/* EXTRA EXPENSE FUNCTIONS */
-
+// EXTRA
 function addExtra(){
-  if(!extraItem.value || !extraRate.value || !extraQty.value || !extraDate.value){
-    alert("सभी फील्ड भरें");
-    return;
-  }
-
-  let total = +extraRate.value * +extraQty.value;
-
-  extraRecords.push({
-    item: extraItem.value,
-    rate: +extraRate.value,
-    qty: +extraQty.value,
-    total: total,
-    date: extraDate.value
-  });
-
-  localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
-  showExtra();
-  extraItem.value = "";
-  extraRate.value = "";
-  extraQty.value = "";
-  extraDate.value = "";
+let t=extraRate.value*extraQty.value;
+extraRecords.push({item:extraItem.value,total:t,date:extraDate.value});
+localStorage.setItem("extraExpense",JSON.stringify(extraRecords));
+showExtra();
 }
 
 function showExtra(){
-  let html = "";
-  let totalsByDate = {};
+let html="",tot={};
 
-  extraRecords.forEach((r,i)=>{
-    html += `<tr>
-      <td>${i+1}</td>
-      <td>${r.item}</td>
-      <td>₹${r.rate}</td>
-      <td>${r.qty}</td>
-      <td>₹${r.total}</td>
-      <td>${r.date}</td>
-      <td><button class="delete" onclick="deleteExtra(${i})">Delete</button></td>
-    </tr>`;
+extraRecords.forEach((r,i)=>{
+html+=`<tr>
+<td>${i+1}</td>
+<td>${r.item}</td>
+<td>₹${r.total}</td>
+<td>${r.date}</td>
+<td><button onclick="delExtra(${i})">X</button></td>
+</tr>`;
 
-    if(!totalsByDate[r.date]) totalsByDate[r.date] = 0;
-    totalsByDate[r.date] += r.total;
-  });
+tot[r.date]=(tot[r.date]||0)+r.total;
+});
 
-  extraData.innerHTML = html;
+extraData.innerHTML=html;
 
-  // Show total per date
-  let totalHtml = "";
-  for(let date in totalsByDate){
-    totalHtml += `${date}: ₹${totalsByDate[date]} <br>`;
-  }
-  extraDayTotal.innerHTML = `<strong>दिन के हिसाब से कुल खर्चा:</strong><br>` + totalHtml;
+let txt="";
+for(let d in tot){txt+=d+" : ₹"+tot[d]+"<br>";}
+extraDayTotal.innerHTML=txt;
 }
 
-function deleteExtra(i){
-  if(confirm("क्या आप इस Extra खर्चा को हटाना चाहते हैं?")){
-    extraRecords.splice(i,1);
-    localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
-    showExtra();
-  }
-}
-
-// Page load
+function delExtra(i){
+let p=prompt("Admin Password:");
+if(p!=adminPassword)return alert("Wrong Password");
+extraRecords.splice(i,1);
+localStorage.setItem("extraExpense",JSON.stringify(extraRecords));
 showExtra();
+}
+
+show();
+showExtra();
+
 </script>
 
 </body>
