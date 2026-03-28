@@ -1,166 +1,420 @@
-<!DOCTYPE html><html lang="hi">
+<!DOCTYPE html>
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
-<title>Harvester PRO MAX</title>
+<title>Harvester FINAL PRO MAX</title>
+
 <style>
 body {font-family:Arial; margin:0; background:#eef2f7;}
 header {background:#1e272e; color:white; padding:15px; text-align:center;}
-.container {padding:20px;}
-input, select {padding:8px; margin:5px;}
-button {padding:8px 12px; margin:5px; cursor:pointer;}
+
+/* LOGIN */
+#loginPage {
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background: linear-gradient(135deg, #667eea, #764ba2);
+}
+.loginBox {
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+text-align:center;
+}
+.loginBox input {
+width:85%;
+margin:10px 0;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+.login {
+background: linear-gradient(45deg, #00b894, #00cec9);
+color:white;
+width:90%;
+}
+
+/* MAIN */
+.container {padding:15px;}
+input, select {
+padding:10px; margin:5px;
+border-radius:5px; border:1px solid #ccc;
+}
+button {
+padding:10px 15px; margin:5px;
+border:none; border-radius:5px;
+cursor:pointer; font-weight:bold;
+}
 .add {background:green; color:white;}
 .delete {background:red; color:white;}
 .edit {background:orange; color:white;}
-.login {background:#0984e3; color:white;}
+.logout {background:black; color:white;}
+.clear {background:#6c5ce7; color:white;}
+
 table {width:100%; border-collapse:collapse; margin-top:20px;}
 th, td {border:1px solid #ccc; padding:10px; text-align:center;}
 th {background:#2f3640; color:white;}
-.card {background:white; padding:15px; margin-top:15px; border-radius:10px;}
+
+.card {
+background:white; padding:15px;
+margin-top:15px; border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+.dueHighlight {
+color:red;
+font-weight:bold;
+text-decoration:underline;
+}
 </style>
 </head>
-<body><header>
-<h2>🚜 Harvester PRO MAX System</h2>
-</header><div class="container" id="loginPage">
-<h3>🔐 Login</h3>
+
+<body>
+
+<header>
+<h2>🚜 Sagar Harvester Company Limited </h2>
+</header>
+
+<!-- LOGIN -->
+<div id="loginPage">
+<div class="loginBox">
+<h2>🔐 Login</h2>
 <input type="text" id="user" placeholder="Username">
 <input type="password" id="pass" placeholder="Password">
 <button class="login" onclick="login()">Login</button>
-</div><div class="container" id="main" style="display:none;"><div class="card">
-<h3>➕ नया काम जोड़ें</h3>
+</div>
+</div>
+
+<!-- MAIN -->
+<div class="container" id="main" style="display:none;">
+
+<button class="logout" onclick="logout()">Logout</button>
+
+<!-- HARVESTER RECORD CARD -->
+<div class="card">
+<h3>➕ नया काम</h3>
+
+<input type="date" id="date">
 <input type="text" id="farmer" placeholder="किसान">
 <input type="text" id="village" placeholder="गांव">
+<input type="text" id="mobile" placeholder="मोबाइल">
+
 <select id="crop">
 <option>गेहूं</option>
 <option>धान</option>
 <option>लाही</option>
 <option>सरसों</option>
 </select>
+
 <input type="number" id="acre" placeholder="एकड़">
 <input type="number" id="rate" placeholder="रेट">
 <input type="number" id="paid" placeholder="मिला पैसा">
-<button class="add" onclick="addRecord()">Add</button>
-</div><div class="card">
-<h3>⛽ खर्चा (Diesel / मजदूरी)</h3>
 <input type="number" id="expense" placeholder="खर्चा">
-<button onclick="addExpense()">Add Expense</button>
-<h4 id="totalExpense">कुल खर्चा: ₹0</h4>
-</div><div class="card">
-<h3>🔍 सर्च</h3>
+
+<button class="add" onclick="addRecord()">Add</button>
+</div>
+
+<!-- SEARCH & FILTER -->
+<div class="card">
+<h3>🔍 Search + Date Filter</h3>
+
 <input type="text" id="search" onkeyup="searchData()" placeholder="नाम खोजें">
-</div><table>
+
+<input type="date" id="fromDate">
+<input type="date" id="toDate">
+<button onclick="filterByDate()">Filter</button>
+
+</div>
+
+<div class="card">
+<button onclick="downloadExcel()">📥 Excel</button>
+</div>
+
+<div class="card">
+<h3>🔴 बाकी वाले (Priority)</h3>
+<ul id="dueList"></ul>
+</div>
+
+<table>
 <thead>
 <tr>
-<th>नाम</th><th>गांव</th><th>फसल</th><th>एकड़</th><th>रेट</th><th>कुल</th><th>मिला</th><th>बाकी</th><th>Action</th>
+<th>Date</th><th>नाम</th><th>गांव</th><th>मोबाइल</th>
+<th>फसल</th><th>एकड़</th><th>कुल</th>
+<th>मिला</th><th>बाकी</th><th>खर्चा</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="data"></tbody>
-</table><div class="card">
-<h3 id="income">कुल कमाई: ₹0</h3>
-<h3 id="expenseShow">कुल खर्चा: ₹0</h3>
-<h2 id="profit">शुद्ध मुनाफा: ₹0</h2>
-</div></div><script>
+</table>
+
+<div class="card">
+<h3 id="income">कुल काम: ₹0</h3>
+<h3 id="paidShow">मिला पैसा: ₹0</h3>
+<h3 id="expenseShow">खर्चा: ₹0</h3>
+<h2 id="profit">मुनाफा: ₹0</h2>
+</div>
+
+<!-- EXTRA EXPENSE CARD -->
+<div class="card">
+<h3>💰 एक्स्ट्रा खर्चा</h3>
+<input type="date" id="extraDate">
+<input type="text" id="extraItem" placeholder="Item / खर्चा विवरण">
+<input type="number" id="extraAmount" placeholder="Amount / ₹">
+<button class="add" onclick="addExtra()">Add</button>
+
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Item</th>
+<th>Amount</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="extraData"></tbody>
+</table>
+<h4 id="extraTotal">कुल Extra खर्चा: ₹0</h4>
+</div>
+
+<script>
 let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
-let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+let editIndex = -1; // एडिट मोड के लिए
+let extraRecords = JSON.parse(localStorage.getItem("extraExpense")) || [];
+
+const addBtn = document.querySelector(".add");
 
 function login(){
-let u = document.getElementById("user").value;
-let p = document.getElementById("pass").value;
-if(u=="admin" && p=="1234"){
-document.getElementById("loginPage").style.display="none";
-document.getElementById("main").style.display="block";
-show();
-}else{alert("गलत लॉगिन");}
+  if(user.value=="V" && pass.value=="1"){
+    loginPage.style.display="none";
+    main.style.display="block";
+    show(records);
+    showExtra();
+  } else {
+    alert("कृपया विवेक जी से अनुमति लाइए");
+  }
+}
+
+function logout(){
+  main.style.display="none";
+  loginPage.style.display="flex";
 }
 
 function save(){
-localStorage.setItem("harvesterPro", JSON.stringify(records));
-localStorage.setItem("expenses", JSON.stringify(expenses));
+  localStorage.setItem("harvesterPro", JSON.stringify(records));
+}
+
+function clearFields(){
+  date.value="";
+  farmer.value="";
+  village.value="";
+  mobile.value="";
+  crop.value="गेहूं";
+  acre.value="";
+  rate.value="";
+  paid.value="";
+  expense.value="";
 }
 
 function addRecord(){
-let farmer = farmerInput.value;
-let village = villageInput.value;
-let crop = cropInput.value;
-let acre = parseFloat(acreInput.value);
-let rate = parseFloat(rateInput.value);
-let paid = parseFloat(paidInput.value);
+  let total = acre.value * rate.value;
+  let due = total - paid.value;
 
-let total = acre * rate;
-let due = total - paid;
+  if(editIndex === -1){
+    records.push({
+      date:date.value,
+      farmer:farmer.value,
+      village:village.value,
+      mobile:mobile.value,
+      crop:crop.value,
+      acre:+acre.value,
+      rate:+rate.value,
+      total:total,
+      paid:+paid.value,
+      due:due,
+      expense:+expense.value || 0
+    });
+  } else {
+    records[editIndex] = {
+      date:date.value,
+      farmer:farmer.value,
+      village:village.value,
+      mobile:mobile.value,
+      crop:crop.value,
+      acre:+acre.value,
+      rate:+rate.value,
+      total:total,
+      paid:+paid.value,
+      due:due,
+      expense:+expense.value || 0
+    };
+    editIndex = -1;
+    addBtn.innerText = "Add";
+  }
 
-records.push({farmer,village,crop,acre,rate,total,paid,due});
-save();
-show();
+  save();
+  show(records);
+  clearFields();
 }
 
-function addExpense(){
-let exp = parseFloat(document.getElementById("expense").value);
-expenses.push(exp);
-save();
-show();
-}
+function show(dataArr){
+  let html="";
+  let dueHTML="";
+  let totalIncome=0, totalPaid=0, totalExpense=0;
 
-function show(){
-let data = document.getElementById("data");
-data.innerHTML="";
-let income=0, expTotal=0;
+  dataArr.forEach((r,i)=>{
+    totalIncome += r.total;
+    totalPaid += r.paid;
+    totalExpense += r.expense;
 
-records.forEach((r,i)=>{
-income += r.total;
-data.innerHTML += `<tr>
-<td>${r.farmer}</td>
-<td>${r.village}</td>
-<td>${r.crop}</td>
-<td>${r.acre}</td>
-<td>${r.rate}</td>
-<td>${r.total}</td>
-<td>${r.paid}</td>
-<td>${r.due}</td>
-<td>
-<button class="edit" onclick="editRecord(${i})">Edit</button>
-<button class="delete" onclick="deleteRecord(${i})">Delete</button>
-</td>
-</tr>`;
-});
+    if(r.due > 0){
+      dueHTML += `<li>
+      ${r.farmer} - ₹${r.due}
+      <a href="tel:${r.mobile}">📞</a>
+      <a href="https://wa.me/91${r.mobile}?text=आपका ₹${r.due} बाकी है">📲</a>
+      </li>`;
+    }
 
-expenses.forEach(e=> expTotal+=e);
+    html += `<tr>
+    <td>${r.date}</td>
+    <td>${r.farmer}</td>
+    <td>${r.village}</td>
+    <td>${r.mobile}</td>
+    <td>${r.crop}</td>
+    <td>${r.acre}</td>
+    <td>${r.total}</td>
+    <td>${r.paid}</td>
+    <td class="${r.due>0?'dueHighlight':''}">${r.due}</td>
+    <td>${r.expense}</td>
+    <td>
+      <button class="edit" onclick="editRecord(${i})">Edit</button>
+      <button class="delete" onclick="deleteRecord(${i})">Delete</button>
+    </td>
+    </tr>`;
+  });
 
-let profit = income - expTotal;
+  data.innerHTML = html;
+  dueList.innerHTML = dueHTML;
 
-document.getElementById("income").innerText = "कुल कमाई: ₹"+income;
-document.getElementById("expenseShow").innerText = "कुल खर्चा: ₹"+expTotal;
-document.getElementById("profit").innerText = "शुद्ध मुनाफा: ₹"+profit;
+  let profitVal = totalPaid - totalExpense;
+
+  income.innerText = "कुल काम: ₹"+totalIncome;
+  paidShow.innerText = "मिला पैसा: ₹"+totalPaid;
+  expenseShow.innerText = "खर्चा: ₹"+totalExpense;
+  profit.innerText = "मुनाफा: ₹"+profitVal;
 }
 
 function deleteRecord(i){
-records.splice(i,1);
-save(); show();
+  if(confirm("क्या आप सच में यह रिकॉर्ड डिलीट करना चाहते हैं?")){
+    records.splice(i,1);
+    save();
+    show(records);
+    clearFields();
+    editIndex = -1;
+    addBtn.innerText = "Add";
+  }
 }
 
 function editRecord(i){
-let r = records[i];
-farmerInput.value=r.farmer;
-villageInput.value=r.village;
-cropInput.value=r.crop;
-acreInput.value=r.acre;
-rateInput.value=r.rate;
-paidInput.value=r.paid;
-deleteRecord(i);
+  let r = records[i];
+
+  date.value=r.date;
+  farmer.value=r.farmer;
+  village.value=r.village;
+  mobile.value=r.mobile;
+  crop.value=r.crop;
+  acre.value=r.acre;
+  rate.value=r.rate;
+  paid.value=r.paid;
+  expense.value=r.expense;
+
+  editIndex = i;
+  addBtn.innerText = "Update";
 }
 
 function searchData(){
-let val = search.value.toLowerCase();
-document.querySelectorAll("tbody tr").forEach(row=>{
-row.style.display = row.innerText.toLowerCase().includes(val)?"":"none";
-});
+  let val = search.value.toLowerCase();
+  let filtered = records.filter(r =>
+    r.farmer.toLowerCase().includes(val)
+  );
+  show(filtered);
 }
 
-const farmerInput = document.getElementById("farmer");
-const villageInput = document.getElementById("village");
-const cropInput = document.getElementById("crop");
-const acreInput = document.getElementById("acre");
-const rateInput = document.getElementById("rate");
-const paidInput = document.getElementById("paid");
+function filterByDate(){
+  let f = fromDate.value;
+  let t = toDate.value;
+  let filtered = records.filter(r =>
+    r.date >= f && r.date <= t
+  );
+  show(filtered);
+}
 
-</script></body>
+function downloadExcel(){
+  let csv = 'Date,Name,Village,Mobile,Crop,Acre,Rate,Total,Paid,Due,Expense\n';
+
+  records.forEach(r=>{
+    csv += `${r.date},${r.farmer},${r.village},${r.mobile},${r.crop},${r.acre},${r.rate},${r.total},${r.paid},${r.due},${r.expense}\n`;
+  });
+
+  let blob = new Blob([csv]);
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "harvester.csv";
+  a.click();
+}
+
+/* EXTRA EXPENSE FUNCTIONS */
+
+function addExtra(){
+  if(!extraDate.value || !extraItem.value || !extraAmount.value){
+    alert("सभी फील्ड भरें");
+    return;
+  }
+
+  extraRecords.push({
+    date: extraDate.value,
+    item: extraItem.value,
+    amount: +extraAmount.value
+  });
+
+  localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
+  showExtra();
+  extraDate.value = "";
+  extraItem.value = "";
+  extraAmount.value = "";
+}
+
+function showExtra(){
+  let html = "";
+  let total = 0;
+
+  extraRecords.forEach((r,i)=>{
+    total += r.amount;
+    html += `<tr>
+      <td>${r.date}</td>
+      <td>${r.item}</td>
+      <td>₹${r.amount}</td>
+      <td>
+        <button class="delete" onclick="deleteExtra(${i})">Delete</button>
+      </td>
+    </tr>`;
+  });
+
+  extraData.innerHTML = html;
+  extraTotal.innerText = "कुल Extra खर्चा: ₹" + total;
+}
+
+function deleteExtra(i){
+  if(confirm("क्या आप इस Extra खर्चा को हटाना चाहते हैं?")){
+    extraRecords.splice(i,1);
+    localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
+    showExtra();
+  }
+}
+
+// पेज लोड पर
+showExtra();
+</script>
+
+</body>
 </html>
