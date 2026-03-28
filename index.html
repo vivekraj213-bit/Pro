@@ -158,28 +158,32 @@ text-decoration:underline;
 <!-- EXTRA EXPENSE CARD -->
 <div class="card">
 <h3>💰 एक्स्ट्रा खर्चा</h3>
-<input type="date" id="extraDate">
 <input type="text" id="extraItem" placeholder="Item / खर्चा विवरण">
-<input type="number" id="extraAmount" placeholder="Amount / ₹">
+<input type="number" id="extraRate" placeholder="Rate / ₹">
+<input type="number" id="extraQty" placeholder="Quantity">
+<input type="date" id="extraDate">
 <button class="add" onclick="addExtra()">Add</button>
 
 <table>
 <thead>
 <tr>
-<th>Date</th>
+<th>S.No.</th>
 <th>Item</th>
-<th>Amount</th>
+<th>Rate</th>
+<th>Quantity</th>
+<th>Total</th>
+<th>Date</th>
 <th>Action</th>
 </tr>
 </thead>
 <tbody id="extraData"></tbody>
 </table>
-<h4 id="extraTotal">कुल Extra खर्चा: ₹0</h4>
+<h4 id="extraDayTotal">कुल खर्चा: ₹0</h4>
 </div>
 
 <script>
 let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
-let editIndex = -1; // एडिट मोड के लिए
+let editIndex = -1;
 let extraRecords = JSON.parse(localStorage.getItem("extraExpense")) || [];
 
 const addBtn = document.querySelector(".add");
@@ -366,42 +370,56 @@ function downloadExcel(){
 /* EXTRA EXPENSE FUNCTIONS */
 
 function addExtra(){
-  if(!extraDate.value || !extraItem.value || !extraAmount.value){
+  if(!extraItem.value || !extraRate.value || !extraQty.value || !extraDate.value){
     alert("सभी फील्ड भरें");
     return;
   }
 
+  let total = +extraRate.value * +extraQty.value;
+
   extraRecords.push({
-    date: extraDate.value,
     item: extraItem.value,
-    amount: +extraAmount.value
+    rate: +extraRate.value,
+    qty: +extraQty.value,
+    total: total,
+    date: extraDate.value
   });
 
   localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
   showExtra();
-  extraDate.value = "";
   extraItem.value = "";
-  extraAmount.value = "";
+  extraRate.value = "";
+  extraQty.value = "";
+  extraDate.value = "";
 }
 
 function showExtra(){
   let html = "";
-  let total = 0;
+  let totalsByDate = {};
 
   extraRecords.forEach((r,i)=>{
-    total += r.amount;
     html += `<tr>
-      <td>${r.date}</td>
+      <td>${i+1}</td>
       <td>${r.item}</td>
-      <td>₹${r.amount}</td>
-      <td>
-        <button class="delete" onclick="deleteExtra(${i})">Delete</button>
-      </td>
+      <td>₹${r.rate}</td>
+      <td>${r.qty}</td>
+      <td>₹${r.total}</td>
+      <td>${r.date}</td>
+      <td><button class="delete" onclick="deleteExtra(${i})">Delete</button></td>
     </tr>`;
+
+    if(!totalsByDate[r.date]) totalsByDate[r.date] = 0;
+    totalsByDate[r.date] += r.total;
   });
 
   extraData.innerHTML = html;
-  extraTotal.innerText = "कुल Extra खर्चा: ₹" + total;
+
+  // Show total per date
+  let totalHtml = "";
+  for(let date in totalsByDate){
+    totalHtml += `${date}: ₹${totalsByDate[date]} <br>`;
+  }
+  extraDayTotal.innerHTML = `<strong>दिन के हिसाब से कुल खर्चा:</strong><br>` + totalHtml;
 }
 
 function deleteExtra(i){
@@ -412,7 +430,7 @@ function deleteExtra(i){
   }
 }
 
-// पेज लोड पर
+// Page load
 showExtra();
 </script>
 
