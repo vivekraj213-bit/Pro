@@ -107,7 +107,7 @@ text-decoration:underline;
 <input type="number" id="rate" placeholder="रेट">
 <input type="number" id="paid" placeholder="मिला पैसा">
 
-<!-- 🔥 NEW COMMISSION FIELD -->
+<!-- ✅ NEW COMMISSION -->
 <input type="number" id="commission" placeholder="कमीशन (Broker)">
 
 <input type="number" id="expense" placeholder="खर्चा">
@@ -141,7 +141,7 @@ text-decoration:underline;
 <th>Date</th><th>नाम</th><th>गांव</th><th>मोबाइल</th>
 <th>फसल</th><th>एकड़</th><th>कुल</th>
 <th>मिला</th><th>बाकी</th>
-<th>कमीशन</th> <!-- NEW -->
+<th>कमीशन</th>
 <th>खर्चा</th><th>Action</th>
 </tr>
 </thead>
@@ -151,13 +151,40 @@ text-decoration:underline;
 <div class="card">
 <h3 id="income">कुल काम: ₹0</h3>
 <h3 id="paidShow">मिला पैसा: ₹0</h3>
-<h3 id="commissionShow">कमीशन: ₹0</h3> <!-- NEW -->
+<h3 id="commissionShow">कमीशन: ₹0</h3>
 <h3 id="expenseShow">खर्चा: ₹0</h3>
 <h2 id="profit">मुनाफा: ₹0</h2>
 </div>
 
+<!-- 🔥 EXTRA EXPENSE SAME AS ORIGINAL -->
+<div class="card">
+<h3>💰 एक्स्ट्रा खर्चा</h3>
+<input type="text" id="extraItem" placeholder="Item / खर्चा विवरण">
+<input type="number" id="extraRate" placeholder="Rate / ₹">
+<input type="number" id="extraQty" placeholder="Quantity">
+<input type="date" id="extraDate">
+<button class="add" onclick="addExtra()">Add</button>
+
+<table>
+<thead>
+<tr>
+<th>S.No.</th>
+<th>Item</th>
+<th>Rate</th>
+<th>Quantity</th>
+<th>Total</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="extraData"></tbody>
+</table>
+<h4 id="extraDayTotal">कुल खर्चा: ₹0</h4>
+</div>
+
 <script>
 let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
+let extraRecords = JSON.parse(localStorage.getItem("extraExpense")) || [];
 let editIndex = -1;
 
 const adminPassword = "1254";
@@ -167,6 +194,7 @@ function login(){
     loginPage.style.display="none";
     main.style.display="block";
     show(records);
+    showExtra();
   } else {
     alert("कृपया विवेक जी से अनुमति लाइए");
   }
@@ -262,7 +290,8 @@ function show(dataArr){
   data.innerHTML = html;
   dueList.innerHTML = dueHTML;
 
-  let profitVal = totalPaid - (totalExpense + totalCommission);
+  let extraTotal = extraRecords.reduce((sum, r) => sum + r.total, 0);
+  let profitVal = totalPaid - (totalExpense + totalCommission + extraTotal);
 
   income.innerText = "कुल काम: ₹"+totalIncome;
   paidShow.innerText = "मिला पैसा: ₹"+totalPaid;
@@ -271,57 +300,49 @@ function show(dataArr){
   profit.innerText = "मुनाफा: ₹"+profitVal;
 }
 
-function deleteRecord(i){
+/* EXTRA SAME FUNCTIONS */
+function addExtra(){
+  let total = +extraRate.value * +extraQty.value;
+  extraRecords.push({
+    item: extraItem.value,
+    rate: +extraRate.value,
+    qty: +extraQty.value,
+    total: total,
+    date: extraDate.value
+  });
+  localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
+  showExtra();
+  extraItem.value=""; extraRate.value=""; extraQty.value=""; extraDate.value="";
+}
+
+function showExtra(){
+  let html = "";
+  let totalsByDate = {};
+  extraRecords.forEach((r,i)=>{
+    html += `<tr>
+      <td>${i+1}</td>
+      <td>${r.item}</td>
+      <td>₹${r.rate}</td>
+      <td>${r.qty}</td>
+      <td>₹${r.total}</td>
+      <td>${r.date}</td>
+      <td><button class="delete" onclick="deleteExtra(${i})">Delete</button></td>
+    </tr>`;
+    if(!totalsByDate[r.date]) totalsByDate[r.date] = 0;
+    totalsByDate[r.date] += r.total;
+  });
+  extraData.innerHTML = html;
+}
+
+function deleteExtra(i){
   let pass = prompt("पासवर्ड डालें");
   if(pass !== adminPassword) return;
-  records.splice(i,1);
-  save();
-  show(records);
+  extraRecords.splice(i,1);
+  localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
+  showExtra();
 }
 
-function editRecord(i){
-  let r = records[i];
-  date.value=r.date;
-  farmer.value=r.farmer;
-  village.value=r.village;
-  mobile.value=r.mobile;
-  crop.value=r.crop;
-  acre.value=r.acre;
-  rate.value=r.rate;
-  paid.value=r.paid;
-  commission.value=r.commission || 0;
-  expense.value=r.expense;
-  editIndex = i;
-}
-
-function searchData(){
-  let val = search.value.toLowerCase();
-  let filtered = records.filter(r =>
-    r.farmer.toLowerCase().includes(val)
-  );
-  show(filtered);
-}
-
-function filterByDate(){
-  let f = fromDate.value;
-  let t = toDate.value;
-  let filtered = records.filter(r =>
-    r.date >= f && r.date <= t
-  );
-  show(filtered);
-}
-
-function downloadExcel(){
-  let csv = 'Date,Name,Village,Mobile,Crop,Acre,Rate,Total,Paid,Due,Commission,Expense\n';
-  records.forEach(r=>{
-    csv += `${r.date},${r.farmer},${r.village},${r.mobile},${r.crop},${r.acre},${r.rate},${r.total},${r.paid},${r.due},${r.commission},${r.expense}\n`;
-  });
-  let blob = new Blob([csv]);
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "harvester.csv";
-  a.click();
-}
+showExtra();
 </script>
 
 </body>
