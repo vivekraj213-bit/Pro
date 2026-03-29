@@ -311,8 +311,7 @@ function show(dataArr){
   data.innerHTML = html;
   dueList.innerHTML = dueHTML;
 
-  let extraTotal = extraRecords.reduce((sum, r) => sum + r.total, 0);
-  let profitVal = totalPaid - (totalExpense + totalCommission + extraTotal);
+  let profitVal = totalPaid - (totalExpense + totalCommission);
 
   income.innerText = "कुल काम: ₹"+totalIncome;
   paidShow.innerText = "मिला पैसा: ₹"+totalPaid;
