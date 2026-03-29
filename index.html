@@ -1,190 +1,4 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<title>Harvester FINAL PRO MAX</title>
-
-<style>
-body {font-family:Arial; margin:0; background:#eef2f7;}
-header {background:#1e272e; color:white; padding:15px; text-align:center;}
-
-#loginPage {
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-background: linear-gradient(135deg, #667eea, #764ba2);
-}
-.loginBox {
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
-text-align:center;
-}
-.loginBox input {
-width:85%;
-margin:10px 0;
-padding:12px;
-border-radius:8px;
-border:1px solid #ccc;
-}
-.login {
-background: linear-gradient(45deg, #00b894, #00cec9);
-color:white;
-width:90%;
-}
-
-.container {padding:15px;}
-input, select {
-padding:10px; margin:5px;
-border-radius:5px; border:1px solid #ccc;
-}
-button {
-padding:10px 15px; margin:5px;
-border:none; border-radius:5px;
-cursor:pointer; font-weight:bold;
-}
-.add {background:green; color:white;}
-.delete {background:red; color:white;}
-.edit {background:orange; color:white;}
-.logout {background:black; color:white;}
-.clear {background:#6c5ce7; color:white;}
-
-table {width:100%; border-collapse:collapse; margin-top:20px;}
-th, td {border:1px solid #ccc; padding:10px; text-align:center;}
-th {background:#2f3640; color:white;}
-
-.card {
-background:white; padding:15px;
-margin-top:15px; border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-.dueHighlight {
-color:red;
-font-weight:bold;
-text-decoration:underline;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<h2>🚜 Sagar Harvester Company Limited </h2>
-</header>
-
-<!-- LOGIN -->
-<div id="loginPage">
-<div class="loginBox">
-<h2>🔐 Login</h2>
-<input type="text" id="user" placeholder="Username">
-<input type="password" id="pass" placeholder="Password">
-<button class="login" onclick="login()">Login</button>
-</div>
-</div>
-
-<!-- MAIN -->
-<div class="container" id="main" style="display:none;">
-
-<button class="logout" onclick="logout()">Logout</button>
-
-<!-- HARVESTER RECORD CARD -->
-<div class="card">
-<h3>➕ नया काम</h3>
-
-<input type="date" id="date">
-<input type="text" id="farmer" placeholder="किसान">
-<input type="text" id="village" placeholder="गांव">
-<input type="text" id="mobile" placeholder="मोबाइल">
-
-<select id="crop">
-<option>गेहूं</option>
-<option>धान</option>
-<option>लाही</option>
-<option>सरसों</option>
-</select>
-
-<input type="number" id="acre" placeholder="एकड़">
-<input type="number" id="rate" placeholder="रेट">
-<input type="number" id="paid" placeholder="मिला पैसा">
-
-<!-- ✅ NEW -->
-<input type="number" id="commission" placeholder="कमीशन (Broker)">
-
-<input type="number" id="expense" placeholder="खर्चा">
-
-<button class="add" onclick="addRecord()">Add</button>
-</div>
-
-<!-- SEARCH -->
-<div class="card">
-<h3>🔍 Search + Date Filter</h3>
-
-<input type="text" id="search" onkeyup="searchData()" placeholder="नाम खोजें">
-
-<input type="date" id="fromDate">
-<input type="date" id="toDate">
-<button onclick="filterByDate()">Filter</button>
-
-</div>
-
-<div class="card">
-<button onclick="downloadExcel()">📥 Excel</button>
-</div>
-
-<div class="card">
-<h3>🔴 बाकी वाले (Priority)</h3>
-<ul id="dueList"></ul>
-</div>
-
-<table>
-<thead>
-<tr>
-<th>Date</th><th>नाम</th><th>गांव</th><th>मोबाइल</th>
-<th>फसल</th><th>एकड़</th><th>कुल</th>
-<th>मिला</th><th>बाकी</th>
-<th>कमीशन</th> <!-- ✅ NEW -->
-<th>खर्चा</th><th>Action</th>
-</tr>
-</thead>
-<tbody id="data"></tbody>
-</table>
-
-<div class="card">
-<h3 id="income">कुल काम: ₹0</h3>
-<h3 id="paidShow">मिला पैसा: ₹0</h3>
-<h3 id="expenseShow">खर्चा: ₹0</h3>
-<h3 id="commissionShow">कमीशन: ₹0</h3> <!-- ✅ NEW -->
-<h2 id="profit">मुनाफा: ₹0</h2>
-</div>
-
-<!-- EXTRA EXPENSE (UNCHANGED) -->
-<div class="card">
-<h3>💰 एक्स्ट्रा खर्चा</h3>
-<input type="text" id="extraItem" placeholder="Item / खर्चा विवरण">
-<input type="number" id="extraRate" placeholder="Rate / ₹">
-<input type="number" id="extraQty" placeholder="Quantity">
-<input type="date" id="extraDate">
-<button class="add" onclick="addExtra()">Add</button>
-
-<table>
-<thead>
-<tr>
-<th>S.No.</th>
-<th>Item</th>
-<th>Rate</th>
-<th>Quantity</th>
-<th>Total</th>
-<th>Date</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="extraData"></tbody>
-</table>
-<h4 id="extraDayTotal">कुल खर्चा: ₹0</h4>
-</div>
+<!-- 🔽 सिर्फ SCRIPT वाला हिस्सा बदलो (बाकी सब same रहेगा) -->
 
 <script>
 let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
@@ -196,6 +10,7 @@ const adminPassword = "1254";
 
 function login(){
   if(user.value=="V" && pass.value=="1"){
+    localStorage.setItem("isLogin","true"); // ✅ ADD
     loginPage.style.display="none";
     main.style.display="block";
     show(records);
@@ -206,6 +21,7 @@ function login(){
 }
 
 function logout(){
+  localStorage.removeItem("isLogin"); // ✅ ADD
   main.style.display="none";
   loginPage.style.display="flex";
 }
@@ -320,7 +136,6 @@ function show(dataArr){
   profit.innerText = "मुनाफा: ₹"+profitVal;
 }
 
-/* बाकी सब functions SAME */
 function deleteRecord(i){
   let pass = prompt("रिकॉर्ड डिलीट करने के लिए पहले विवेक जी से अनुमति लीजिये");
   if(pass !== adminPassword){
@@ -425,8 +240,16 @@ function deleteExtra(i){
   showExtra();
 }
 
-showExtra();
+// ✅ AUTO LOGIN (MAIN FIX)
+window.onload = function(){
+  if(localStorage.getItem("isLogin") === "true"){
+    loginPage.style.display="none";
+    main.style.display="block";
+    show(records);
+    showExtra();
+  } else {
+    loginPage.style.display="flex";
+    main.style.display="none";
+  }
+}
 </script>
-
-</body>
-</html>
