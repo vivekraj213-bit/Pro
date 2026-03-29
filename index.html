@@ -75,6 +75,7 @@ text-decoration:underline;
 <h2>🚜 Sagar Harvester Company Limited </h2>
 </header>
 
+<!-- LOGIN -->
 <div id="loginPage">
 <div class="loginBox">
 <h2>🔐 Login</h2>
@@ -84,10 +85,12 @@ text-decoration:underline;
 </div>
 </div>
 
+<!-- MAIN -->
 <div class="container" id="main" style="display:none;">
 
 <button class="logout" onclick="logout()">Logout</button>
 
+<!-- HARVESTER RECORD CARD -->
 <div class="card">
 <h3>➕ नया काम</h3>
 
@@ -107,7 +110,7 @@ text-decoration:underline;
 <input type="number" id="rate" placeholder="रेट">
 <input type="number" id="paid" placeholder="मिला पैसा">
 
-<!-- ✅ NEW COMMISSION -->
+<!-- ✅ NEW -->
 <input type="number" id="commission" placeholder="कमीशन (Broker)">
 
 <input type="number" id="expense" placeholder="खर्चा">
@@ -115,6 +118,7 @@ text-decoration:underline;
 <button class="add" onclick="addRecord()">Add</button>
 </div>
 
+<!-- SEARCH -->
 <div class="card">
 <h3>🔍 Search + Date Filter</h3>
 
@@ -141,7 +145,7 @@ text-decoration:underline;
 <th>Date</th><th>नाम</th><th>गांव</th><th>मोबाइल</th>
 <th>फसल</th><th>एकड़</th><th>कुल</th>
 <th>मिला</th><th>बाकी</th>
-<th>कमीशन</th>
+<th>कमीशन</th> <!-- ✅ NEW -->
 <th>खर्चा</th><th>Action</th>
 </tr>
 </thead>
@@ -151,12 +155,12 @@ text-decoration:underline;
 <div class="card">
 <h3 id="income">कुल काम: ₹0</h3>
 <h3 id="paidShow">मिला पैसा: ₹0</h3>
-<h3 id="commissionShow">कमीशन: ₹0</h3>
 <h3 id="expenseShow">खर्चा: ₹0</h3>
+<h3 id="commissionShow">कमीशन: ₹0</h3> <!-- ✅ NEW -->
 <h2 id="profit">मुनाफा: ₹0</h2>
 </div>
 
-<!-- 🔥 EXTRA EXPENSE SAME AS ORIGINAL -->
+<!-- EXTRA EXPENSE (UNCHANGED) -->
 <div class="card">
 <h3>💰 एक्स्ट्रा खर्चा</h3>
 <input type="text" id="extraItem" placeholder="Item / खर्चा विवरण">
@@ -184,9 +188,10 @@ text-decoration:underline;
 
 <script>
 let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
-let extraRecords = JSON.parse(localStorage.getItem("extraExpense")) || [];
 let editIndex = -1;
+let extraRecords = JSON.parse(localStorage.getItem("extraExpense")) || [];
 
+const addBtn = document.querySelector(".add");
 const adminPassword = "1254";
 
 function login(){
@@ -226,26 +231,38 @@ function addRecord(){
   let total = acre.value * rate.value;
   let due = total - paid.value;
 
-  let obj = {
-    date:date.value,
-    farmer:farmer.value,
-    village:village.value,
-    mobile:mobile.value,
-    crop:crop.value,
-    acre:+acre.value,
-    rate:+rate.value,
-    total:total,
-    paid:+paid.value,
-    due:due,
-    commission:+commission.value || 0,
-    expense:+expense.value || 0
-  };
-
   if(editIndex === -1){
-    records.push(obj);
+    records.push({
+      date:date.value,
+      farmer:farmer.value,
+      village:village.value,
+      mobile:mobile.value,
+      crop:crop.value,
+      acre:+acre.value,
+      rate:+rate.value,
+      total:total,
+      paid:+paid.value,
+      due:due,
+      commission:+commission.value || 0,
+      expense:+expense.value || 0
+    });
   } else {
-    records[editIndex] = obj;
+    records[editIndex] = {
+      date:date.value,
+      farmer:farmer.value,
+      village:village.value,
+      mobile:mobile.value,
+      crop:crop.value,
+      acre:+acre.value,
+      rate:+rate.value,
+      total:total,
+      paid:+paid.value,
+      due:due,
+      commission:+commission.value || 0,
+      expense:+expense.value || 0
+    };
     editIndex = -1;
+    addBtn.innerText = "Add";
   }
 
   save();
@@ -265,7 +282,11 @@ function show(dataArr){
     totalCommission += r.commission || 0;
 
     if(r.due > 0){
-      dueHTML += `<li>${r.farmer} - ₹${r.due}</li>`;
+      dueHTML += `<li>
+      ${r.farmer} - ₹${r.due}
+      <a href="tel:${r.mobile}">📞</a>
+      <a href="https://wa.me/91${r.mobile}?text=आपका ₹${r.due} बाकी है">📲</a>
+      </li>`;
     }
 
     html += `<tr>
@@ -277,7 +298,7 @@ function show(dataArr){
     <td>${r.acre}</td>
     <td>${r.total}</td>
     <td>${r.paid}</td>
-    <td>${r.due}</td>
+    <td class="${r.due>0?'dueHighlight':''}">${r.due}</td>
     <td>${r.commission || 0}</td>
     <td>${r.expense}</td>
     <td>
@@ -295,12 +316,69 @@ function show(dataArr){
 
   income.innerText = "कुल काम: ₹"+totalIncome;
   paidShow.innerText = "मिला पैसा: ₹"+totalPaid;
-  commissionShow.innerText = "कमीशन: ₹"+totalCommission;
   expenseShow.innerText = "खर्चा: ₹"+totalExpense;
+  commissionShow.innerText = "कमीशन: ₹"+totalCommission;
   profit.innerText = "मुनाफा: ₹"+profitVal;
 }
 
-/* EXTRA SAME FUNCTIONS */
+/* बाकी सब functions SAME */
+function deleteRecord(i){
+  let pass = prompt("रिकॉर्ड डिलीट करने के लिए पहले विवेक जी से अनुमति लीजिये");
+  if(pass !== adminPassword){
+    alert("गलत पासवर्ड!");
+    return;
+  }
+  records.splice(i,1);
+  save();
+  show(records);
+}
+
+function editRecord(i){
+  let r = records[i];
+  date.value=r.date;
+  farmer.value=r.farmer;
+  village.value=r.village;
+  mobile.value=r.mobile;
+  crop.value=r.crop;
+  acre.value=r.acre;
+  rate.value=r.rate;
+  paid.value=r.paid;
+  commission.value=r.commission || 0;
+  expense.value=r.expense;
+  editIndex = i;
+  addBtn.innerText="Update";
+}
+
+function searchData(){
+  let val = search.value.toLowerCase();
+  let filtered = records.filter(r =>
+    r.farmer.toLowerCase().includes(val)
+  );
+  show(filtered);
+}
+
+function filterByDate(){
+  let f = fromDate.value;
+  let t = toDate.value;
+  let filtered = records.filter(r =>
+    r.date >= f && r.date <= t
+  );
+  show(filtered);
+}
+
+function downloadExcel(){
+  let csv = 'Date,Name,Village,Mobile,Crop,Acre,Rate,Total,Paid,Due,Commission,Expense\n';
+  records.forEach(r=>{
+    csv += `${r.date},${r.farmer},${r.village},${r.mobile},${r.crop},${r.acre},${r.rate},${r.total},${r.paid},${r.due},${r.commission},${r.expense}\n`;
+  });
+  let blob = new Blob([csv]);
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "harvester.csv";
+  a.click();
+}
+
+/* EXTRA SAME */
 function addExtra(){
   let total = +extraRate.value * +extraQty.value;
   extraRecords.push({
@@ -332,10 +410,16 @@ function showExtra(){
     totalsByDate[r.date] += r.total;
   });
   extraData.innerHTML = html;
+
+  let totalHtml="";
+  for(let d in totalsByDate){
+    totalHtml += `${d}: ₹${totalsByDate[d]}<br>`;
+  }
+  extraDayTotal.innerHTML = totalHtml;
 }
 
 function deleteExtra(i){
-  let pass = prompt("पासवर्ड डालें");
+  let pass = prompt("क्या आपने विवेक जी की अनुमति लिया है");
   if(pass !== adminPassword) return;
   extraRecords.splice(i,1);
   localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
