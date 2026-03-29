@@ -9,46 +9,78 @@ body {font-family:Arial; margin:0; background:#eef2f7;}
 header {background:#1e272e; color:white; padding:15px; text-align:center;}
 
 #loginPage {
-display:flex;justify-content:center;align-items:center;
-height:100vh;background: linear-gradient(135deg, #667eea, #764ba2);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background: linear-gradient(135deg, #667eea, #764ba2);
 }
-.loginBox {background:white;padding:30px;border-radius:12px;text-align:center;}
+.loginBox {
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+text-align:center;
+}
+.loginBox input {
+width:85%;
+margin:10px 0;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+.login {
+background: linear-gradient(45deg, #00b894, #00cec9);
+color:white;
+width:90%;
+}
 
 .container {padding:15px;}
-input, select {padding:10px;margin:5px;border-radius:5px;border:1px solid #ccc;}
-button {padding:10px 15px;margin:5px;border:none;border-radius:5px;font-weight:bold;}
+input, select {
+padding:10px; margin:5px;
+border-radius:5px; border:1px solid #ccc;
+}
+button {
+padding:10px 15px; margin:5px;
+border:none; border-radius:5px;
+cursor:pointer; font-weight:bold;
+}
+.add {background:green; color:white;}
+.delete {background:red; color:white;}
+.edit {background:orange; color:white;}
+.logout {background:black; color:white;}
+.clear {background:#6c5ce7; color:white;}
 
-.add{background:green;color:white;}
-.delete{background:red;color:white;}
-.edit{background:orange;color:white;}
-.logout{background:black;color:white;}
+table {width:100%; border-collapse:collapse; margin-top:20px;}
+th, td {border:1px solid #ccc; padding:10px; text-align:center;}
+th {background:#2f3640; color:white;}
 
-table {width:100%;border-collapse:collapse;margin-top:20px;}
-th, td {border:1px solid #ccc;padding:10px;text-align:center;}
-th {background:#2f3640;color:white;}
+.card {
+background:white; padding:15px;
+margin-top:15px; border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
 
-.card {background:white;padding:15px;margin-top:15px;border-radius:10px;}
-
-.dueHighlight {color:red;font-weight:bold;text-decoration:underline;}
-.dueDanger {animation:blink 1s infinite;}
-@keyframes blink {50%{opacity:0.3;}}
-
-.paidHighlight {color:green;font-weight:bold;}
-.paidFull {color:darkgreen;font-weight:bold;}
-.zeroValue {color:gray;}
+.dueHighlight {
+color:red;
+font-weight:bold;
+text-decoration:underline;
+}
 </style>
 </head>
 
 <body>
 
-<header><h2>🚜 Sagar Harvester Company Limited</h2></header>
+<header>
+<h2>🚜 Sagar Harvester Company Limited </h2>
+</header>
 
 <div id="loginPage">
 <div class="loginBox">
 <h2>🔐 Login</h2>
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
+<input type="text" id="user" placeholder="Username">
+<input type="password" id="pass" placeholder="Password">
+<button class="login" onclick="login()">Login</button>
 </div>
 </div>
 
@@ -56,182 +88,240 @@ th {background:#2f3640;color:white;}
 
 <button class="logout" onclick="logout()">Logout</button>
 
-<!-- DASHBOARD -->
-<div class="card" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-<div class="card"><h3>💰 Income</h3><h2 id="dashIncome">₹0</h2></div>
-<div class="card"><h3>🟢 Paid</h3><h2 id="dashPaid">₹0</h2></div>
-<div class="card"><h3>🔴 Due</h3><h2 id="dashDue">₹0</h2></div>
-<div class="card"><h3>💸 Expense</h3><h2 id="dashExpense">₹0</h2></div>
-</div>
-
-<!-- ORIGINAL FORM SAME -->
 <div class="card">
+<h3>➕ नया काम</h3>
+
 <input type="date" id="date">
 <input type="text" id="farmer" placeholder="किसान">
 <input type="text" id="village" placeholder="गांव">
 <input type="text" id="mobile" placeholder="मोबाइल">
+
 <select id="crop">
-<option>गेहूं</option><option>धान</option>
-<option>लाही</option><option>सरसों</option>
+<option>गेहूं</option>
+<option>धान</option>
+<option>लाही</option>
+<option>सरसों</option>
 </select>
+
 <input type="number" id="acre" placeholder="एकड़">
 <input type="number" id="rate" placeholder="रेट">
 <input type="number" id="paid" placeholder="मिला पैसा">
+
+<!-- 🔥 NEW COMMISSION FIELD -->
+<input type="number" id="commission" placeholder="कमीशन (Broker)">
+
 <input type="number" id="expense" placeholder="खर्चा">
+
 <button class="add" onclick="addRecord()">Add</button>
 </div>
 
+<div class="card">
+<h3>🔍 Search + Date Filter</h3>
+
+<input type="text" id="search" onkeyup="searchData()" placeholder="नाम खोजें">
+
+<input type="date" id="fromDate">
+<input type="date" id="toDate">
+<button onclick="filterByDate()">Filter</button>
+
+</div>
+
+<div class="card">
+<button onclick="downloadExcel()">📥 Excel</button>
+</div>
+
+<div class="card">
+<h3>🔴 बाकी वाले (Priority)</h3>
+<ul id="dueList"></ul>
+</div>
+
 <table>
+<thead>
 <tr>
-<th>Date</th><th>नाम</th><th>कुल</th>
-<th>मिला</th><th>बाकी</th><th>Action</th>
+<th>Date</th><th>नाम</th><th>गांव</th><th>मोबाइल</th>
+<th>फसल</th><th>एकड़</th><th>कुल</th>
+<th>मिला</th><th>बाकी</th>
+<th>कमीशन</th> <!-- NEW -->
+<th>खर्चा</th><th>Action</th>
 </tr>
+</thead>
 <tbody id="data"></tbody>
 </table>
 
-<!-- EXTRA EXPENSE -->
 <div class="card">
-<h3>💰 Extra Expense</h3>
-<input id="extraItem" placeholder="Item">
-<input id="extraRate" type="number" placeholder="Rate">
-<input id="extraQty" type="number" placeholder="Qty">
-<input id="extraDate" type="date">
-<button onclick="addExtra()">Add</button>
-
-<table>
-<tr><th>S.No</th><th>Item</th><th>Total</th><th>Date</th><th></th></tr>
-<tbody id="extraData"></tbody>
-</table>
-<h4 id="extraDayTotal"></h4>
+<h3 id="income">कुल काम: ₹0</h3>
+<h3 id="paidShow">मिला पैसा: ₹0</h3>
+<h3 id="commissionShow">कमीशन: ₹0</h3> <!-- NEW -->
+<h3 id="expenseShow">खर्चा: ₹0</h3>
+<h2 id="profit">मुनाफा: ₹0</h2>
 </div>
 
 <script>
+let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
+let editIndex = -1;
 
-// LOGIN REMEMBER
-if(localStorage.getItem("login")=="yes"){
-loginPage.style.display="none";
-main.style.display="block";
-}
+const adminPassword = "1254";
 
 function login(){
-if(user.value=="V" && pass.value=="1"){
-localStorage.setItem("login","yes");
-loginPage.style.display="none";
-main.style.display="block";
-show();showExtra();
-}
+  if(user.value=="V" && pass.value=="1"){
+    loginPage.style.display="none";
+    main.style.display="block";
+    show(records);
+  } else {
+    alert("कृपया विवेक जी से अनुमति लाइए");
+  }
 }
 
 function logout(){
-localStorage.removeItem("login");
-location.reload();
+  main.style.display="none";
+  loginPage.style.display="flex";
 }
 
-let records=JSON.parse(localStorage.getItem("harvesterPro"))||[];
-let extraRecords=JSON.parse(localStorage.getItem("extraExpense"))||[];
-const adminPassword="admin123";
-
 function save(){
-localStorage.setItem("harvesterPro",JSON.stringify(records));
+  localStorage.setItem("harvesterPro", JSON.stringify(records));
+}
+
+function clearFields(){
+  date.value="";
+  farmer.value="";
+  village.value="";
+  mobile.value="";
+  crop.value="गेहूं";
+  acre.value="";
+  rate.value="";
+  paid.value="";
+  commission.value="";
+  expense.value="";
 }
 
 function addRecord(){
-let total=acre.value*rate.value;
-let due=total-paid.value;
+  let total = acre.value * rate.value;
+  let due = total - paid.value;
 
-records.push({
-date:date.value,
-farmer:farmer.value,
-total:total,
-paid:+paid.value,
-due:due,
-expense:+expense.value||0
-});
+  let obj = {
+    date:date.value,
+    farmer:farmer.value,
+    village:village.value,
+    mobile:mobile.value,
+    crop:crop.value,
+    acre:+acre.value,
+    rate:+rate.value,
+    total:total,
+    paid:+paid.value,
+    due:due,
+    commission:+commission.value || 0,
+    expense:+expense.value || 0
+  };
 
-save();show();
+  if(editIndex === -1){
+    records.push(obj);
+  } else {
+    records[editIndex] = obj;
+    editIndex = -1;
+  }
+
+  save();
+  show(records);
+  clearFields();
 }
 
-function show(){
-let html="",ti=0,tp=0,te=0;
+function show(dataArr){
+  let html="";
+  let dueHTML="";
+  let totalIncome=0, totalPaid=0, totalExpense=0, totalCommission=0;
 
-records.forEach((r,i)=>{
-ti+=r.total;tp+=r.paid;te+=r.expense;
+  dataArr.forEach((r,i)=>{
+    totalIncome += r.total;
+    totalPaid += r.paid;
+    totalExpense += r.expense;
+    totalCommission += r.commission || 0;
 
-html+=`<tr>
-<td>${r.date}</td>
-<td>${r.farmer}</td>
-<td>₹${r.total}</td>
+    if(r.due > 0){
+      dueHTML += `<li>${r.farmer} - ₹${r.due}</li>`;
+    }
 
-<td class="${
-r.paid==0?'zeroValue':
-r.paid>=r.total?'paidFull':'paidHighlight'
-}">₹${r.paid}</td>
+    html += `<tr>
+    <td>${r.date}</td>
+    <td>${r.farmer}</td>
+    <td>${r.village}</td>
+    <td>${r.mobile}</td>
+    <td>${r.crop}</td>
+    <td>${r.acre}</td>
+    <td>${r.total}</td>
+    <td>${r.paid}</td>
+    <td>${r.due}</td>
+    <td>${r.commission || 0}</td>
+    <td>${r.expense}</td>
+    <td>
+      <button class="edit" onclick="editRecord(${i})">Edit</button>
+      <button class="delete" onclick="deleteRecord(${i})">Delete</button>
+    </td>
+    </tr>`;
+  });
 
-<td class="${
-r.due==0?'zeroValue':
-r.due>5000?'dueHighlight dueDanger':'dueHighlight'
-}">₹${r.due}</td>
+  data.innerHTML = html;
+  dueList.innerHTML = dueHTML;
 
-<td><button onclick="del(${i})">Delete</button></td>
-</tr>`;
-});
+  let profitVal = totalPaid - (totalExpense + totalCommission);
 
-data.innerHTML=html;
-
-dashIncome.innerText="₹"+ti;
-dashPaid.innerText="₹"+tp;
-dashDue.innerText="₹"+(ti-tp);
-dashExpense.innerText="₹"+te;
+  income.innerText = "कुल काम: ₹"+totalIncome;
+  paidShow.innerText = "मिला पैसा: ₹"+totalPaid;
+  commissionShow.innerText = "कमीशन: ₹"+totalCommission;
+  expenseShow.innerText = "खर्चा: ₹"+totalExpense;
+  profit.innerText = "मुनाफा: ₹"+profitVal;
 }
 
-function del(i){
-let p=prompt("Admin Password:");
-if(p!=adminPassword)return alert("Wrong Password");
-records.splice(i,1);
-save();show();
+function deleteRecord(i){
+  let pass = prompt("पासवर्ड डालें");
+  if(pass !== adminPassword) return;
+  records.splice(i,1);
+  save();
+  show(records);
 }
 
-// EXTRA
-function addExtra(){
-let t=extraRate.value*extraQty.value;
-extraRecords.push({item:extraItem.value,total:t,date:extraDate.value});
-localStorage.setItem("extraExpense",JSON.stringify(extraRecords));
-showExtra();
+function editRecord(i){
+  let r = records[i];
+  date.value=r.date;
+  farmer.value=r.farmer;
+  village.value=r.village;
+  mobile.value=r.mobile;
+  crop.value=r.crop;
+  acre.value=r.acre;
+  rate.value=r.rate;
+  paid.value=r.paid;
+  commission.value=r.commission || 0;
+  expense.value=r.expense;
+  editIndex = i;
 }
 
-function showExtra(){
-let html="",tot={};
-
-extraRecords.forEach((r,i)=>{
-html+=`<tr>
-<td>${i+1}</td>
-<td>${r.item}</td>
-<td>₹${r.total}</td>
-<td>${r.date}</td>
-<td><button onclick="delExtra(${i})">X</button></td>
-</tr>`;
-
-tot[r.date]=(tot[r.date]||0)+r.total;
-});
-
-extraData.innerHTML=html;
-
-let txt="";
-for(let d in tot){txt+=d+" : ₹"+tot[d]+"<br>";}
-extraDayTotal.innerHTML=txt;
+function searchData(){
+  let val = search.value.toLowerCase();
+  let filtered = records.filter(r =>
+    r.farmer.toLowerCase().includes(val)
+  );
+  show(filtered);
 }
 
-function delExtra(i){
-let p=prompt("Admin Password:");
-if(p!=adminPassword)return alert("Wrong Password");
-extraRecords.splice(i,1);
-localStorage.setItem("extraExpense",JSON.stringify(extraRecords));
-showExtra();
+function filterByDate(){
+  let f = fromDate.value;
+  let t = toDate.value;
+  let filtered = records.filter(r =>
+    r.date >= f && r.date <= t
+  );
+  show(filtered);
 }
 
-show();
-showExtra();
-
+function downloadExcel(){
+  let csv = 'Date,Name,Village,Mobile,Crop,Acre,Rate,Total,Paid,Due,Commission,Expense\n';
+  records.forEach(r=>{
+    csv += `${r.date},${r.farmer},${r.village},${r.mobile},${r.crop},${r.acre},${r.rate},${r.total},${r.paid},${r.due},${r.commission},${r.expense}\n`;
+  });
+  let blob = new Blob([csv]);
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "harvester.csv";
+  a.click();
+}
 </script>
 
 </body>
