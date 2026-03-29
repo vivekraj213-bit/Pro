@@ -1,255 +1,290 @@
-<!-- 🔽 सिर्फ SCRIPT वाला हिस्सा बदलो (बाकी सब same रहेगा) -->
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Harvester FINAL PRO MAX</title>
+
+<style>
+body {font-family:Arial; margin:0; background:#eef2f7;}
+header {background:#1e272e; color:white; padding:15px; text-align:center;}
+
+#loginPage {
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background: linear-gradient(135deg, #667eea, #764ba2);
+}
+.loginBox {
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+text-align:center;
+}
+.loginBox input {
+width:85%;
+margin:10px 0;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+.login {
+background: linear-gradient(45deg, #00b894, #00cec9);
+color:white;
+width:90%;
+}
+
+.container {padding:15px;}
+input, select {
+padding:10px; margin:5px;
+border-radius:5px; border:1px solid #ccc;
+}
+button {
+padding:10px 15px; margin:5px;
+border:none; border-radius:5px;
+cursor:pointer; font-weight:bold;
+}
+.add {background:green; color:white;}
+.delete {background:red; color:white;}
+.edit {background:orange; color:white;}
+.logout {background:black; color:white;}
+
+table {width:100%; border-collapse:collapse; margin-top:20px;}
+th, td {border:1px solid #ccc; padding:10px; text-align:center;}
+th {background:#2f3640; color:white;}
+
+.card {
+background:white; padding:15px;
+margin-top:15px; border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+.dueHighlight {color:red; font-weight:bold;}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>🚜 Sagar Harvester Company Limited </h2>
+</header>
+
+<!-- LOGIN -->
+<div id="loginPage">
+<div class="loginBox">
+<h2>🔐 Login</h2>
+<input type="text" id="user">
+<input type="password" id="pass">
+<button class="login" onclick="login()">Login</button>
+</div>
+</div>
+
+<!-- MAIN -->
+<div class="container" id="main" style="display:none;">
+
+<button class="logout" onclick="logout()">Logout</button>
+
+<div class="card">
+<h3>➕ नया काम</h3>
+
+<input type="date" id="date">
+<input type="text" id="farmer" placeholder="किसान">
+<input type="text" id="village" placeholder="गांव">
+<input type="text" id="mobile" placeholder="मोबाइल">
+
+<select id="crop">
+<option>गेहूं</option>
+<option>धान</option>
+<option>लाही</option>
+<option>सरसों</option>
+</select>
+
+<input type="number" id="acre">
+<input type="number" id="rate">
+<input type="number" id="paid">
+<input type="number" id="commission" placeholder="कमीशन">
+<input type="number" id="expense">
+
+<button id="mainAdd" class="add" onclick="addRecord()">Add</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Date</th><th>नाम</th><th>गांव</th><th>मोबाइल</th>
+<th>फसल</th><th>एकड़</th><th>कुल</th>
+<th>मिला</th><th>बाकी</th><th>कमीशन</th><th>खर्चा</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="data"></tbody>
+</table>
+
+<div class="card">
+<h3 id="income">₹0</h3>
+<h3 id="paidShow">₹0</h3>
+<h3 id="expenseShow">₹0</h3>
+<h3 id="commissionShow">₹0</h3>
+<h2 id="profit">₹0</h2>
+</div>
+
+<!-- EXTRA -->
+<div class="card">
+<h3>💰 एक्स्ट्रा खर्चा</h3>
+<input type="text" id="extraItem">
+<input type="number" id="extraRate">
+<input type="number" id="extraQty">
+<input type="date" id="extraDate">
+<button class="add" onclick="addExtra()">Add</button>
+
+<table>
+<thead>
+<tr>
+<th>#</th><th>Item</th><th>Rate</th><th>Qty</th><th>Total</th><th>Date</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="extraData"></tbody>
+</table>
+</div>
 
 <script>
 let records = JSON.parse(localStorage.getItem("harvesterPro")) || [];
-let editIndex = -1;
 let extraRecords = JSON.parse(localStorage.getItem("extraExpense")) || [];
-
-const addBtn = document.querySelector(".add");
-const adminPassword = "1254";
+let editIndex = -1;
+const adminPassword="1254";
 
 function login(){
-  if(user.value=="V" && pass.value=="1"){
-    localStorage.setItem("isLogin","true"); // ✅ ADD
-    loginPage.style.display="none";
-    main.style.display="block";
-    show(records);
-    showExtra();
-  } else {
-    alert("कृपया विवेक जी से अनुमति लाइए");
-  }
+ if(user.value=="V" && pass.value=="1"){
+  localStorage.setItem("isLogin","true");
+  loginPage.style.display="none";
+  main.style.display="block";
+  show();
+  showExtra();
+ }
 }
 
 function logout(){
-  localStorage.removeItem("isLogin"); // ✅ ADD
-  main.style.display="none";
-  loginPage.style.display="flex";
-}
-
-function save(){
-  localStorage.setItem("harvesterPro", JSON.stringify(records));
-}
-
-function clearFields(){
-  date.value="";
-  farmer.value="";
-  village.value="";
-  mobile.value="";
-  crop.value="गेहूं";
-  acre.value="";
-  rate.value="";
-  paid.value="";
-  commission.value="";
-  expense.value="";
+ localStorage.removeItem("isLogin");
+ loginPage.style.display="flex";
+ main.style.display="none";
 }
 
 function addRecord(){
-  let total = acre.value * rate.value;
-  let due = total - paid.value;
+ let total = acre.value * rate.value;
+ let due = total - paid.value;
 
-  if(editIndex === -1){
-    records.push({
-      date:date.value,
-      farmer:farmer.value,
-      village:village.value,
-      mobile:mobile.value,
-      crop:crop.value,
-      acre:+acre.value,
-      rate:+rate.value,
-      total:total,
-      paid:+paid.value,
-      due:due,
-      commission:+commission.value || 0,
-      expense:+expense.value || 0
-    });
-  } else {
-    records[editIndex] = {
-      date:date.value,
-      farmer:farmer.value,
-      village:village.value,
-      mobile:mobile.value,
-      crop:crop.value,
-      acre:+acre.value,
-      rate:+rate.value,
-      total:total,
-      paid:+paid.value,
-      due:due,
-      commission:+commission.value || 0,
-      expense:+expense.value || 0
-    };
-    editIndex = -1;
-    addBtn.innerText = "Add";
-  }
+ let obj={
+  date:date.value,
+  farmer:farmer.value,
+  village:village.value,
+  mobile:mobile.value,
+  crop:crop.value,
+  acre:+acre.value,
+  rate:+rate.value,
+  total:total,
+  paid:+paid.value,
+  due:due,
+  commission:+commission.value||0,
+  expense:+expense.value||0
+ };
 
-  save();
-  show(records);
-  clearFields();
+ if(editIndex==-1) records.push(obj);
+ else {records[editIndex]=obj; editIndex=-1;}
+
+ localStorage.setItem("harvesterPro",JSON.stringify(records));
+ show();
 }
 
-function show(dataArr){
-  let html="";
-  let dueHTML="";
-  let totalIncome=0, totalPaid=0, totalExpense=0, totalCommission=0;
+function show(){
+ let html="",ti=0,tp=0,te=0,tc=0;
 
-  dataArr.forEach((r,i)=>{
-    totalIncome += r.total;
-    totalPaid += r.paid;
-    totalExpense += r.expense;
-    totalCommission += r.commission || 0;
+ records.forEach((r,i)=>{
+  ti+=r.total; tp+=r.paid; te+=r.expense; tc+=r.commission||0;
 
-    if(r.due > 0){
-      dueHTML += `<li>
-      ${r.farmer} - ₹${r.due}
-      <a href="tel:${r.mobile}">📞</a>
-      <a href="https://wa.me/91${r.mobile}?text=आपका ₹${r.due} बाकी है">📲</a>
-      </li>`;
-    }
+  html+=`<tr>
+  <td>${r.date}</td>
+  <td>${r.farmer}</td>
+  <td>${r.village}</td>
+  <td>${r.mobile}</td>
+  <td>${r.crop}</td>
+  <td>${r.acre}</td>
+  <td>${r.total}</td>
+  <td>${r.paid}</td>
+  <td>${r.due}</td>
+  <td>${r.commission||0}</td>
+  <td>${r.expense}</td>
+  <td>
+   <button onclick="editRecord(${i})">Edit</button>
+   <button onclick="deleteRecord(${i})">Delete</button>
+  </td>
+  </tr>`;
+ });
 
-    html += `<tr>
-    <td>${r.date}</td>
-    <td>${r.farmer}</td>
-    <td>${r.village}</td>
-    <td>${r.mobile}</td>
-    <td>${r.crop}</td>
-    <td>${r.acre}</td>
-    <td>${r.total}</td>
-    <td>${r.paid}</td>
-    <td class="${r.due>0?'dueHighlight':''}">${r.due}</td>
-    <td>${r.commission || 0}</td>
-    <td>${r.expense}</td>
-    <td>
-      <button class="edit" onclick="editRecord(${i})">Edit</button>
-      <button class="delete" onclick="deleteRecord(${i})">Delete</button>
-    </td>
-    </tr>`;
-  });
+ data.innerHTML=html;
 
-  data.innerHTML = html;
-  dueList.innerHTML = dueHTML;
-
-  let profitVal = totalPaid - (totalExpense + totalCommission);
-
-  income.innerText = "कुल काम: ₹"+totalIncome;
-  paidShow.innerText = "मिला पैसा: ₹"+totalPaid;
-  expenseShow.innerText = "खर्चा: ₹"+totalExpense;
-  commissionShow.innerText = "कमीशन: ₹"+totalCommission;
-  profit.innerText = "मुनाफा: ₹"+profitVal;
-}
-
-function deleteRecord(i){
-  let pass = prompt("रिकॉर्ड डिलीट करने के लिए पहले विवेक जी से अनुमति लीजिये");
-  if(pass !== adminPassword){
-    alert("गलत पासवर्ड!");
-    return;
-  }
-  records.splice(i,1);
-  save();
-  show(records);
+ income.innerText=ti;
+ paidShow.innerText=tp;
+ expenseShow.innerText=te;
+ commissionShow.innerText=tc;
+ profit.innerText=tp-(te+tc);
 }
 
 function editRecord(i){
-  let r = records[i];
-  date.value=r.date;
-  farmer.value=r.farmer;
-  village.value=r.village;
-  mobile.value=r.mobile;
-  crop.value=r.crop;
-  acre.value=r.acre;
-  rate.value=r.rate;
-  paid.value=r.paid;
-  commission.value=r.commission || 0;
-  expense.value=r.expense;
-  editIndex = i;
-  addBtn.innerText="Update";
+ let r=records[i];
+ date.value=r.date;
+ farmer.value=r.farmer;
+ village.value=r.village;
+ mobile.value=r.mobile;
+ crop.value=r.crop;
+ acre.value=r.acre;
+ rate.value=r.rate;
+ paid.value=r.paid;
+ commission.value=r.commission;
+ expense.value=r.expense;
+ editIndex=i;
 }
 
-function searchData(){
-  let val = search.value.toLowerCase();
-  let filtered = records.filter(r =>
-    r.farmer.toLowerCase().includes(val)
-  );
-  show(filtered);
+function deleteRecord(i){
+ if(prompt("password")==adminPassword){
+  records.splice(i,1);
+  localStorage.setItem("harvesterPro",JSON.stringify(records));
+  show();
+ }
 }
 
-function filterByDate(){
-  let f = fromDate.value;
-  let t = toDate.value;
-  let filtered = records.filter(r =>
-    r.date >= f && r.date <= t
-  );
-  show(filtered);
-}
-
-function downloadExcel(){
-  let csv = 'Date,Name,Village,Mobile,Crop,Acre,Rate,Total,Paid,Due,Commission,Expense\n';
-  records.forEach(r=>{
-    csv += `${r.date},${r.farmer},${r.village},${r.mobile},${r.crop},${r.acre},${r.rate},${r.total},${r.paid},${r.due},${r.commission},${r.expense}\n`;
-  });
-  let blob = new Blob([csv]);
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "harvester.csv";
-  a.click();
-}
-
-/* EXTRA SAME */
 function addExtra(){
-  let total = +extraRate.value * +extraQty.value;
-  extraRecords.push({
-    item: extraItem.value,
-    rate: +extraRate.value,
-    qty: +extraQty.value,
-    total: total,
-    date: extraDate.value
-  });
-  localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
-  showExtra();
-  extraItem.value=""; extraRate.value=""; extraQty.value=""; extraDate.value="";
+ let t=extraRate.value*extraQty.value;
+ extraRecords.push({item:extraItem.value,rate:+extraRate.value,qty:+extraQty.value,total:t,date:extraDate.value});
+ localStorage.setItem("extraExpense",JSON.stringify(extraRecords));
+ showExtra();
 }
 
 function showExtra(){
-  let html = "";
-  let totalsByDate = {};
-  extraRecords.forEach((r,i)=>{
-    html += `<tr>
-      <td>${i+1}</td>
-      <td>${r.item}</td>
-      <td>₹${r.rate}</td>
-      <td>${r.qty}</td>
-      <td>₹${r.total}</td>
-      <td>${r.date}</td>
-      <td><button class="delete" onclick="deleteExtra(${i})">Delete</button></td>
-    </tr>`;
-    if(!totalsByDate[r.date]) totalsByDate[r.date] = 0;
-    totalsByDate[r.date] += r.total;
-  });
-  extraData.innerHTML = html;
-
-  let totalHtml="";
-  for(let d in totalsByDate){
-    totalHtml += `${d}: ₹${totalsByDate[d]}<br>`;
-  }
-  extraDayTotal.innerHTML = totalHtml;
+ let html="";
+ extraRecords.forEach((r,i)=>{
+  html+=`<tr>
+  <td>${i+1}</td><td>${r.item}</td><td>${r.rate}</td>
+  <td>${r.qty}</td><td>${r.total}</td><td>${r.date}</td>
+  <td><button onclick="deleteExtra(${i})">Delete</button></td>
+  </tr>`;
+ });
+ extraData.innerHTML=html;
 }
 
 function deleteExtra(i){
-  let pass = prompt("क्या आपने विवेक जी की अनुमति लिया है");
-  if(pass !== adminPassword) return;
-  extraRecords.splice(i,1);
-  localStorage.setItem("extraExpense", JSON.stringify(extraRecords));
-  showExtra();
+ extraRecords.splice(i,1);
+ localStorage.setItem("extraExpense",JSON.stringify(extraRecords));
+ showExtra();
 }
 
-// ✅ AUTO LOGIN (MAIN FIX)
-window.onload = function(){
-  if(localStorage.getItem("isLogin") === "true"){
-    loginPage.style.display="none";
-    main.style.display="block";
-    show(records);
-    showExtra();
-  } else {
-    loginPage.style.display="flex";
-    main.style.display="none";
-  }
+window.onload=function(){
+ if(localStorage.getItem("isLogin")=="true"){
+  loginPage.style.display="none";
+  main.style.display="block";
+  show(); showExtra();
+ }
 }
 </script>
+
+</body>
+</html>
